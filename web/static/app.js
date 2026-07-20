@@ -137,6 +137,7 @@ function renderCheckout() {
   });
 
   document.querySelector("[data-uncheckout]")?.addEventListener("click", async (e) => {
+    if (!confirm("Are you sure you want to undo this checkout?")) return;
     try {
       await api(`/api/bidders/${e.target.dataset.uncheckout}/uncheckout`, { method: "POST" });
       toast("Payment undone");
