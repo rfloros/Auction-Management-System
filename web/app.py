@@ -70,6 +70,10 @@ class BidderIn(BaseModel):
     name: str
 
 
+class BidderIdChangeIn(BaseModel):
+    newBidderId: int
+
+
 class SaleIn(BaseModel):
     itemNumber: int
     bidderId: int
@@ -162,6 +166,17 @@ def receipt(bidder_id: int):
             "Content-Disposition": f'inline; filename="receipt_{bidder_id}.pdf"'
         },
     )
+
+
+@app.post("/api/bidders/{bidder_id}/change-id")
+def change_bidder_id(bidder_id: int, new_bidder: BidderIdChangeIn):
+    with write_lock:
+        try:
+            bidder = auction.changeBidderId(bidder_id, new_bidder.newBidderId)
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+        _save()
+        return bidder.to_dict()
 
 
 # ---------- Sales ----------

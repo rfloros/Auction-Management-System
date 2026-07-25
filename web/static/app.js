@@ -242,6 +242,22 @@ $("#bidder-form").addEventListener("submit", async (e) => {
   } catch (err) { toast(err.message, false); }
 });
 
+$("#change-bidder-id-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await api(`/api/bidders/${$("#change-bidder-id").value}/change-id`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        newBidderId: Number($("#new-bidder-id").value),
+      }),
+    });
+    e.target.reset();
+    toast("Bidder ID changed");
+    await refreshAll();
+  } catch (err) { toast(err.message, false); }
+});
+
 $("#sale-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {

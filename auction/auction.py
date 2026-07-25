@@ -35,6 +35,11 @@ class Auction:
         if bidderId in self.bidders:
             raise ValueError(f"Bidder {bidderId} already exists")
 
+    def _ensureNoInfoStored(self, bidderId: int):
+        bidder = self._getBidder(bidderId)
+        if len(bidder.itemsWon) > 0 or bidder.totalOwed > 0 or bidder.amountPaid > 0:
+            raise ValueError(f"Bidder {bidderId} has stored information and cannot be changed")
+
     # ---------- Setup ----------
     def addItem(self, itemNumber: int, name: str, itemType: str) -> Item:
         self._ensureItemDoesNotExist(itemNumber)
@@ -47,6 +52,18 @@ class Auction:
         bidder = Bidder(bidderId, name)
         self.bidders[bidderId] = bidder
         return bidder
+
+    def changeBidderId(self, bidderId: int, newBidderId: int):
+        """ Change bidders Id incase of a typo or if the bidder wants to change their number."""
+        bidder = self._getBidder(bidderId)
+        if bidderId == newBidderId:
+            raise ValueError("New bidder ID must be different from the current bidder ID")
+        self._ensureBidderDoesNotExist(newBidderId)
+        self._ensureNoInfoStored(bidderId)
+
+        name = bidder.name
+        del self.bidders[bidderId]
+        return self.checkInBidder(newBidderId, name)
 
     def reset(self):
         """Clear all items and bidders to start a fresh auction."""
