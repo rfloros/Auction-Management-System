@@ -40,6 +40,8 @@
           <option value="live">live</option>
         </select>
         <button type="submit">Add item</button>
+        <button type="button" id="catalog-sort">ID: Low to High</button>
+
       </form>
       <div class="table-scroll">
         <table id="items-table">
@@ -60,6 +62,8 @@
         <input type="number" id="bidder-id" placeholder="Bidder ID" required />
         <input type="text" id="bidder-name" placeholder="Bidder name" required />
         <button type="submit">Check in</button>
+        <button type="button" id="checkin-sort">ID: Low to High</button>
+
       </form>
       <form id="change-bidder-id-form" class="inline">
         <input type="number" id="change-bidder-id" placeholder="Current Bidder ID" required />
@@ -82,13 +86,21 @@
         <input type="number" id="sale-bidder" placeholder="Bidder ID" required />
         <input type="number" id="sale-price" placeholder="Price" step="0.01" min="0.01" required />
         <button type="submit">Record sale</button>
+        <button type="button" id="sales-sort">Most Recent</button>
       </form>
       <p class="hint">Tip: only unsold items can be recorded; price must be positive.</p>
+      <div class="table-scroll">
+        <table id="sales-table">
+          <thead><tr><th>Winner</th><th>Item</th><th>Sales Price</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Checkout -->
     <section id="checkout" class="panel">
       <h2>Checkout &amp; Receipts</h2>
+      <button type="button" id="checkout-sort">ID: Low to High</button>
       <p class="hint">Charge the total in Square, then mark the bidder as paid. Bidders can check out any time during the event.</p>
       <div class="checkout-layout">
         <div class="table-scroll checkout-list">

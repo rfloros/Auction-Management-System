@@ -8,6 +8,7 @@ class Item:
     itemType: str  # "live" or "silent"
     salePrice: float | None = None
     winnerId: int | None = None
+    timeSold: float | None = None
 
     @property
     def sold(self) -> bool:
@@ -20,6 +21,7 @@ class Item:
             "itemType": self.itemType,
             "salePrice": self.salePrice,
             "winnerId": self.winnerId,
+            "timeSold": self.timeSold,
         }
 
     @classmethod
@@ -30,4 +32,5 @@ class Item:
             itemType=data.get("itemType") or data.get("type") or "silent",
             salePrice=data.get("salePrice"),
             winnerId=data.get("winnerId"),
+            timeSold=data.get("timeSold"),
         )

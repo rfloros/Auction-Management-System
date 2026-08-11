@@ -56,6 +56,8 @@ async function refreshItems() {
   const bidders = await api("/api/bidders");
   const nameById = Object.fromEntries(bidders.map((b) => [b.bidderId, b.name]));
   $("#items-table tbody").innerHTML = items
+    .slice()
+    .sort((a, b) => catalogDirection === "desc" ? b.itemNumber - a.itemNumber : a.itemNumber - b.itemNumber)
     .map((i) => {
       const status = i.winnerId != null
         ? `<span class="pill sold">sold</span>`
@@ -88,6 +90,10 @@ async function refreshItems() {
 let selectedCheckoutId = null;
 let lastBidders = [];
 let lastItemById = {};
+let salesDirection = "desc";
+let checkoutDirection = "asc";
+let checkInDirection = "asc";
+let catalogDirection = "asc";
 
 async function refreshBidders() {
   const bidders = await api("/api/bidders");
@@ -97,6 +103,8 @@ async function refreshBidders() {
   const nameByItem = Object.fromEntries(items.map((i) => [i.itemNumber, i.name]));
 
   $("#bidders-table tbody").innerHTML = bidders
+    .slice()
+    .sort((a, b) => checkInDirection === "desc" ? b.bidderId - a.bidderId : a.bidderId - b.bidderId)
     .map((b) => {
       const won = b.itemsWon.map((id) => nameByItem[id] || `#${id}`).join(", ");
       return `<tr><td>${b.bidderId}</td><td>${b.name}</td><td>${won}</td><td>${money(b.totalOwed)}</td><td>${statusPill(b)}</td></tr>`;
@@ -104,10 +112,13 @@ async function refreshBidders() {
     .join("");
 
   renderCheckout();
+  renderSales();
 }
 
 function renderCheckout() {
   $("#checkout-table tbody").innerHTML = lastBidders
+    .slice()
+    .sort((a, b) => checkoutDirection === "desc" ? b.bidderId - a.bidderId : a.bidderId - b.bidderId)
     .map((b) => {
       const sel = b.bidderId === selectedCheckoutId ? " selected" : "";
       return `<tr class="checkout-row${sel}" data-select="${b.bidderId}">` +
@@ -188,11 +199,45 @@ function checkoutDetailHtml(b) {
     `</div>`;
 }
 
+function renderSales() {
+    const nameById = Object.fromEntries(lastBidders.map((b) => [b.bidderId, b.name]));
+  $("#sales-table tbody").innerHTML = Object.values(lastItemById)
+    .filter((item) => item.winnerId != null)
+    .sort((a, b) => salesDirection === "desc" ? b.timeSold - a.timeSold : a.timeSold - b.timeSold)
+    .map((item) => `<tr><td>${nameById[item.winnerId]}</td><td>${item.name}</td><td>${money(item.salePrice)}</td></tr>`)
+    .join("");
+  }
+
+
 async function refreshAll() {
   await Promise.all([refreshSummary(), refreshItems(), refreshBidders()]);
 }
 
 // ---- forms ----
+$("#sales-sort").addEventListener("click", () => {
+  salesDirection = salesDirection === "desc" ? "asc" : "desc";
+  renderSales();
+  $("#sales-sort").textContent = salesDirection === "desc" ? "Most Recent" : "Oldest First";
+});
+
+$("#checkout-sort").addEventListener("click", () => {
+  checkoutDirection = checkoutDirection === "desc" ? "asc" : "desc";
+  renderCheckout();
+  $("#checkout-sort").textContent = checkoutDirection === "desc" ? "ID: High to Low" : "ID: Low to High";
+});
+
+$("#checkin-sort").addEventListener("click", () => {
+  checkInDirection = checkInDirection === "desc" ? "asc" : "desc";
+  refreshBidders();
+  $("#checkin-sort").textContent = checkInDirection === "desc" ? "ID: High to Low" : "ID: Low to High";
+});
+
+$("#catalog-sort").addEventListener("click", async () => {
+  catalogDirection = catalogDirection === "desc" ? "asc" : "desc";
+  refreshItems();
+  $("#catalog-sort").textContent = catalogDirection === "desc" ? "ID: High to Low" : "ID: Low to High";
+});
+
 $("#item-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {

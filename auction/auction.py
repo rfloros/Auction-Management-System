@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import time
 
 from auction.bidders import Bidder
 from auction.items import Item
@@ -80,6 +81,7 @@ class Auction:
         if salePrice <= 0:
             raise ValueError("Sale price must be positive")
 
+        item.timeSold = time.time()
         item.salePrice = salePrice
         item.winnerId = bidderId
         bidder.itemsWon.append(itemNumber)
@@ -101,6 +103,14 @@ class Auction:
 
         item.salePrice = None
         item.winnerId = None
+        item.timeSold = None
+
+    def deleteItem(self, itemNumber: int):
+        """ Deletes an item from the auction catolog if it has not been sold yet. """
+        item = self._getItem(itemNumber)
+        if item.winnerId is not None:
+            raise ValueError("Item has already been sold.")
+        del self.items[itemNumber]
 
     def checkout(self, bidderId: int) -> Bidder:
         """Settle a bidder's current balance and hand over their items.
