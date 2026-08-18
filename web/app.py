@@ -202,6 +202,16 @@ def undo_sale(item_number: int):
         return auction.items[item_number].to_dict()
 
 
+@app.post("/api/items/{item_number}/delete")
+def delete_item(item_number: int):
+    with write_lock:
+        try:
+            auction.deleteItem(item_number)
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+        _save()
+        return {"status": "deleted"}
+
 # ---------- Reset ----------
 @app.post("/api/reset")
 def reset_auction():

@@ -116,6 +116,10 @@ th { color: #52606d; font-weight: 600; }
 .checkout-row:hover { background: #f4f6f8; }
 .checkout-row.selected { background: #e8edf5; }
 
+.catalog-row { cursor: pointer; }
+.catalog-row:hover { background: #f4f6f8; }
+.catalog-row.selected { background: #e8edf5; }
+
 .checkout-detail {
   background: #f9fafb;
   border: 1px solid #e1e6eb;

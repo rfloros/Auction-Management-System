@@ -66,11 +66,18 @@ async function refreshItems() {
       const undoBtn = i.winnerId != null
         ? `<button class="secondary" data-undo="${i.itemNumber}">Undo sale</button>`
         : "";
-      return `<tr><td>${i.itemNumber} ${status}</td><td>${i.name}</td><td>${i.itemType}</td>` +
+      const sel = i.itemNumber === selectedItemId ? " selected" : "";
+      return `<tr class="catalog-row${sel}" data-item="${i.itemNumber}">`+ `<td>${i.itemNumber} ${status}</td><td>${i.name}</td><td>${i.itemType}</td>` +
         `<td>${money(i.salePrice)}</td><td>${winner}</td><td>${undoBtn}</td></tr>`;
     })
     .join("");
 
+    document.querySelectorAll("[data-item]").forEach((row) => {
+      row.addEventListener("click", () => {
+        selectedItemId = Number(row.dataset.item);
+        refreshItems();
+      });
+    });
   document.querySelectorAll("[data-undo]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!confirm(`Undo the sale for item #${btn.dataset.undo}?`)) return;
@@ -94,6 +101,7 @@ let salesDirection = "desc";
 let checkoutDirection = "asc";
 let checkInDirection = "asc";
 let catalogDirection = "asc";
+let selectedItemId = null;
 
 async function refreshBidders() {
   const bidders = await api("/api/bidders");
@@ -236,6 +244,17 @@ $("#catalog-sort").addEventListener("click", async () => {
   catalogDirection = catalogDirection === "desc" ? "asc" : "desc";
   refreshItems();
   $("#catalog-sort").textContent = catalogDirection === "desc" ? "ID: High to Low" : "ID: Low to High";
+});
+
+$("#delete-item").addEventListener("click", async () => {
+  if (selectedItemId == null) { toast("Item not Selected", false); return; }
+  if (!confirm(`Delete item #${selectedItemId}? This cannot be undone.`)) return;
+  try {
+    await api(`/api/items/${selectedItemId}/delete`, { method: "POST" });
+    toast("Item deleted");
+    selectedItemId = null;
+    await refreshAll();
+  } catch (err) { toast(err.message, false); }
 });
 
 $("#item-form").addEventListener("submit", async (e) => {
